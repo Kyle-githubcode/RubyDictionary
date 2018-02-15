@@ -1,4 +1,14 @@
 <p id="notice"><%= notice %></p>
 
+<p>
+  <strong>Word:</strong>
+  <%= @word.name %>
+</p>
+ 
+<p>
+  <strong>Definition:</strong>
+  <%= @word.definition %>
+</p>
+
 <%= link_to 'Edit', edit_word_path(@word) %> |
 <%= link_to 'Back', words_path %>

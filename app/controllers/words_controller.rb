@@ -10,6 +10,7 @@ class WordsController < ApplicationController
   # GET /words/1
   # GET /words/1.json
   def show
+    @word = Word.find(params[:id])
   end
 
   # GET /words/new
@@ -19,6 +20,7 @@ class WordsController < ApplicationController
 
   # GET /words/1/edit
   def edit
+    @word = Word.find(params[:id])
   end
 
   # POST /words
@@ -67,8 +69,8 @@ class WordsController < ApplicationController
       @word = Word.find(params[:id])
     end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
+    #defines required parameters
     def word_params
-      params.fetch(:word, {})
+      params.require(:word).permit(:name, :definition)
     end
 end
