@@ -4,7 +4,7 @@ class WordsController < ApplicationController
   # GET /words
   # GET /words.json
   def index
-    @words = Word.search(params[:term])
+    @words = Word.search(params[:term]).sort_by{|word| word.name}
   end
 
   # GET /words/1

@@ -1,5 +1,5 @@
 class Word < ApplicationRecord
-	validates_presence_of :name
+	validates :name, :uniqueness => true, :presence => true
 	validates_length_of :name, :within => 2..100
 	validates_format_of :name, with: /[^\s]+/i
 
@@ -26,7 +26,7 @@ class Word < ApplicationRecord
 
 	def self.search(term)
 	  if term
-	    where('name LIKE ?', "%#{term}%").order('name')
+	    where('name LIKE ?', "%#{term}%")
 	  else
 	    all
 	  end
