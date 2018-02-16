@@ -6,8 +6,14 @@
 </p>
  
 <p>
-  <strong>Definition:</strong>
-  <%= @word.definition %>
+  <strong>Definitions:</strong>
+  <ol>
+  	<% @word.definitions.each do |definition| %>
+  		<li>
+  			<%= definition.text %>
+  		</li>
+  	<% end %>
+  </ol>
 </p>
 
 <%= link_to 'Edit', edit_word_path(@word) %> |

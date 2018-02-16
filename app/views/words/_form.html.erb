@@ -16,10 +16,18 @@
     <%= form.text_field :name %>
   </p>
  
-  <p>
-    <%= form.label :definition %><br>
-    <%= form.text_area :definition %>
-  </p>
+  <ol>
+  <%= form.fields_for(word_definition) do |word_definition_form| %>
+    <%= word_definition_form.fields_for(definition) do |definition_form| %>
+        <li>
+          <p>
+            <%= definition_form.label :definition %>
+            <%= definition_form.text_field :text %>
+          </p>
+        </li>
+      <% end %>
+    <% end %>
+  </ol>
 
   <div class="actions">
     <%= form.submit %>

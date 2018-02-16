@@ -10,13 +10,27 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180215080626) do
+ActiveRecord::Schema.define(version: 20180215073526) do
 
-  create_table "words", force: :cascade do |t|
+  create_table "definitions", force: :cascade do |t|
+    t.string "text"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "word_definitions", force: :cascade do |t|
+    t.integer "word_id"
+    t.integer "definition_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["definition_id"], name: "index_word_definitions_on_definition_id"
+    t.index ["word_id"], name: "index_word_definitions_on_word_id"
+  end
+
+  create_table "words", force: :cascade do |t|
     t.string "name"
-    t.string "definition"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
 end
