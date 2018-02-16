@@ -16,5 +16,16 @@
   </ol>
 </p>
 
+<p>
+  <strong>Synonyms:</strong>
+  <ul>
+    <% @word.synonyms.each do |synonym| %>
+      <li>
+        <%= synonym %>
+      </li>
+    <% end %>
+  </ul>
+</p>
+
 <%= link_to 'Edit', edit_word_path(@word) %> |
 <%= link_to 'Back', words_path %>

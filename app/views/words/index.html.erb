@@ -1,6 +1,11 @@
+<%= form_tag(words_path, method: :get) do %>
+  <%= text_field_tag :term, params[:term] %>
+  <%= submit_tag 'Search', term: nil  %>
+<% end %>
+
 <p id="notice"><%= notice %></p>
 
-<h1>Words</h1>
+<h1>Dictionary</h1>
 
 <table>
   <thead>

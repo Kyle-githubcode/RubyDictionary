@@ -12,4 +12,24 @@ class Word < ApplicationRecord
 		definitions.first.text
 	end
 
+	def synonyms
+		synonyms = []
+		definitions.each do |definition_object|
+			synonym_words = Word.select{|word| word.definitions.include?(definition_object)}
+			synonym_words.each do |synonym|
+				synonyms << synonym.name
+			end
+		end
+		synonyms.delete(name)
+		synonyms
+	end
+
+	def self.search(term)
+	  if term
+	    where('name LIKE ?', "%#{term}%").order('name')
+	  else
+	    all
+	  end
+	end
+
 end
