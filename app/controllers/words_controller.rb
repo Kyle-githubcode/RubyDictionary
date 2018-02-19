@@ -30,6 +30,16 @@ class WordsController < ApplicationController
   # POST /words.json
   def create
     @word = Word.new(word_params)
+    unique_definitions = []
+    @word.definitions.each do |definition|
+      matching_definition = Definition.find_by_text(definition.text)
+      if matching_definition.present?
+        unique_definitions << matching_definition
+      else
+        unique_definitions << definition
+      end
+    end
+    @word.definitions = unique_definitions
 
     respond_to do |format|
       if @word.save
@@ -48,7 +58,7 @@ class WordsController < ApplicationController
   def update
     respond_to do |format|
       if @word.update(word_params)
-        format.html { redirect_to @word, notice: 'Word was successfully updated.' + params.to_s }
+        format.html { redirect_to @word, notice: 'Word was successfully updated.' }
         format.json { render :show, status: :ok, location: @word }
       else
         format.html { render :edit }
