@@ -5,7 +5,7 @@ class Word < ApplicationRecord
 
 	has_many :word_definitions
 	has_many :definitions, through: :word_definitions
-	accepts_nested_attributes_for :word_definitions
+	accepts_nested_attributes_for :definitions
 
 	def definition
 		return '' if definitions.blank?

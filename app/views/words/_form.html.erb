@@ -17,9 +17,7 @@
   </p>
  
   <ol>
-  <% word_definitions.each do |word_definition| %>
-    <%= form.fields_for(word_definition) do |word_definition_form| %>
-      <%= word_definition_form.fields_for(word_definition.definition) do |definition_form| %>
+    <%= form.fields_for :definitions, definitions do |definition_form| %>
           <li>
             <p>
               <%= definition_form.label :definition %>
@@ -27,8 +25,6 @@
             </p>
           </li>
         <% end %>
-      <% end %>
-    <% end %>
   </ol>
 
   <div class="actions">

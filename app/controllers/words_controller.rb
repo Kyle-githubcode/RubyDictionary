@@ -16,30 +16,23 @@ class WordsController < ApplicationController
   # GET /words/new
   def new
     @word = Word.new
-    @word_definitions = [@word.word_definitions.build]
-    @definition = @word_definitions.first.build_definition
+    @word_definition = @word.word_definitions.build
+    @definitions = [@word_definition.build_definition]
   end
 
   # GET /words/1/edit
   def edit
     @word = Word.find(params[:id])
-    @word_definitions = @word.word_definitions
+    @definitions = @word.definitions
   end
 
   # POST /words
   # POST /words.json
   def create
     @word = Word.new(word_params)
-    @definition = Definition.find_by_text(definition_params["text"])
-    definition_id = @definition.present? ? @definition.id : nil
-    @word_definition = @word.word_definitions.build(definition_id: definition_id)
-    @definition = @word_definition.build_definition(definition_params) if @definition.blank?
 
     respond_to do |format|
       if @word.save
-        if @definition.text.blank?
-          @definition.update(definition_params)
-        end
 
         format.html { redirect_to @word, notice: 'Word was successfully created.'}
         format.json { render :show, status: :created, location: @word }
@@ -55,9 +48,7 @@ class WordsController < ApplicationController
   def update
     respond_to do |format|
       if @word.update(word_params)
-        #change this to batch update later
-        @word.definitions.first.update(definition_params)
-        format.html { redirect_to @word, notice: 'Word was successfully updated.' }
+        format.html { redirect_to @word, notice: 'Word was successfully updated.' + params.to_s }
         format.json { render :show, status: :ok, location: @word }
       else
         format.html { render :edit }
@@ -84,10 +75,8 @@ class WordsController < ApplicationController
 
     #defines parameters for word and definition models
     def word_params
-      params.require(:word).permit(:name)
-    end
-
-    def definition_params
-      params["word"]["word_definition"].require(:definition).permit(:text)
+      params.require(:word).permit(:name, 
+        definitions_attributes: [:id, :text]
+        )
     end
 end
