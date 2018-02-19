@@ -30,10 +30,10 @@ class WordsController < ApplicationController
   # POST /words.json
   def create
     @word = Word.new(word_params)
-    @definition = Definition.find_by_text(params["word"]["word_definition"]["definition"]["text"])
+    @definition = Definition.find_by_text(definition_params["text"])
     definition_id = @definition.present? ? @definition.id : nil
     @word_definition = @word.word_definitions.build(definition_id: definition_id)
-    @definition = @word_definition.build_definition if @definition.blank?
+    @definition = @word_definition.build_definition(definition_params) if @definition.blank?
 
     respond_to do |format|
       if @word.save
@@ -82,11 +82,9 @@ class WordsController < ApplicationController
       @word = Word.find(params[:id])
     end
 
-    #defines required parameters
+    #defines parameters for word and definition models
     def word_params
-      params.require(:word).permit(:name,
-        word_definition_attributes: [:id,
-          definition_attributes: [:id, :text]])
+      params.require(:word).permit(:name)
     end
 
     def definition_params
