@@ -16,8 +16,8 @@ class WordsController < ApplicationController
   # GET /words/new
   def new
     @word = Word.new
-    @word_definition = @word.word_definitions.build
-    @definition = @word_definition.build_definition
+    @word_definitions = [@word.word_definitions.build]
+    @definition = @word_definitions.first.build_definition
   end
 
   # GET /words/1/edit
