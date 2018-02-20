@@ -3,7 +3,7 @@
   <%= submit_tag 'Search', term: nil  %>
 <% end %>
 
-<p id="notice"><%= notice %></p>
+<p id="notice"><%= notice.html_safe if notice.present? %></p>
 
 <h1>Dictionary</h1>
 
@@ -32,3 +32,15 @@
 <br>
 
 <%= link_to 'New Word', new_word_path %>
+
+<br>
+
+<h3>Import CSV</h3>
+<%= form_tag(import_words_path, multipart: :true) do %>
+  <%= file_field_tag :file %>
+  <%= label_tag :name_header, 'name header' %>
+  <%= text_field_tag :name_header, 'name' %>
+  <%= label_tag :definition_header, 'definition header' %>
+  <%= text_field_tag :definition_header, 'definition' %>
+  <%= submit_tag 'Import' %>
+<% end %>

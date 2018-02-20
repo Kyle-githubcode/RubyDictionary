@@ -13,6 +13,37 @@ class WordsController < ApplicationController
     @word = Word.find(params[:id])
   end
 
+  def import
+    if params[:file].present?
+      notice = 'CSV data was successfully updated.'
+      begin
+        log = Word.import(params[:file], params[:name_header], params[:definition_header])
+      rescue Exception => error
+        if error.message.match?(/\{.+\}/).present?
+          log = eval error.message
+        else
+          log = {file_error: error.message}
+        end
+      end
+      if log[:file_error].present?
+        notice = ' Error processing file: ' + log[:file_error]
+      end
+      notice += "<br>" + log[:words_imported].to_s + " out of " + log[:word_total].to_s + " words imported" if log[:words_imported].present?
+      if log[:word_errors].present?
+        notice += "<br> Word errors: <ul>" + log[:word_errors].keys.map{|name| '<li>' + name + ': ' + log[:word_errors][name].join + '</li>'}.join + '</ul>'
+      end
+      respond_to do |format|
+        format.html { redirect_to words_url, notice: notice}
+        format.json { head :no_content }
+      end
+    else
+      respond_to do |format|
+        format.html { redirect_to words_url, notice: 'CSV file not selected' }
+        format.json { head :no_content }
+      end
+    end
+  end
+
   # GET /words/new
   def new
     @word = Word.new
@@ -30,16 +61,7 @@ class WordsController < ApplicationController
   # POST /words.json
   def create
     @word = Word.new(word_params)
-    unique_definitions = []
-    @word.definitions.each do |definition|
-      matching_definition = Definition.find_by_text(definition.text)
-      if matching_definition.present?
-        unique_definitions << matching_definition
-      else
-        unique_definitions << definition
-      end
-    end
-    @word.definitions = unique_definitions
+    @word.definitions = @word.unique_definitions
 
     respond_to do |format|
       if @word.save

@@ -1,3 +1,4 @@
+require 'csv'
 class Word < ApplicationRecord
 	validates :name, :uniqueness => true, :presence => true
 	validates_length_of :name, :within => 2..100
@@ -6,6 +7,34 @@ class Word < ApplicationRecord
 	has_many :word_definitions
 	has_many :definitions, through: :word_definitions
 	accepts_nested_attributes_for :definitions
+
+	def self.import(file, name_header, definition_header)
+		log = {:word_errors => {}}
+		if file.path.end_with?('.csv')
+			begin
+				log[:words_imported] = 0
+				file_parameters = {:headers => true, :row_sep => :auto, :encoding => 'ISO-8859-1', skip_blanks: true, skip_lines: /[\n\r]+/}
+				log[:word_total] = CSV.read(file.path, file_parameters).length rescue 0
+				CSV.foreach(file.path, file_parameters) do |row|
+					word = Word.new(name: row[name_header], definitions_attributes: [text: row[definition_header]])
+					word.definitions = word.unique_definitions
+					if word.save
+						log[:words_imported] += 1
+					else
+						log[:word_errors][row[name_header]] = word.errors.full_messages
+					end
+				end
+			rescue CSV::MalformedCSVError => csv_error
+				log[:file_error] = csv_error.message
+				raise csv_error, log.to_s, csv_error.backtrace
+			end
+		elsif file.path.end_with? '.xml'
+			#code for importing xml data
+		else
+			log[:file_error] = 'File type not supported'
+		end
+		log
+	end
 
 	def definition
 		return '' if definitions.blank?
@@ -22,6 +51,19 @@ class Word < ApplicationRecord
 		end
 		synonyms.delete(name)
 		synonyms
+	end
+
+	def unique_definitions
+		unique_definitions = []
+    	definitions.each do |originial_definition|
+      		matching_definition = Definition.find_by_text(originial_definition.text)
+      		if matching_definition.present?
+        		unique_definitions << matching_definition
+      		else
+        		unique_definitions << originial_definition
+      		end
+      	end
+      	unique_definitions
 	end
 
 	def self.search(term)
