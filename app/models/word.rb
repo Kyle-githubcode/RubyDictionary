@@ -13,11 +13,20 @@ class Word < ApplicationRecord
 		if file.path.end_with?('.csv')
 			begin
 				log[:words_imported] = 0
+				log[:words_updated] = 0
+				log[:words_created] = 0
 				file_parameters = {:headers => true, :row_sep => :auto, :encoding => 'ISO-8859-1', skip_blanks: true, skip_lines: /[\n\r]+/}
 				log[:word_total] = CSV.read(file.path, file_parameters).length rescue 0
 				CSV.foreach(file.path, file_parameters) do |row|
-					word = Word.new(name: row[name_header], definitions_attributes: [text: row[definition_header]])
-					word.definitions = word.unique_definitions
+					word = Word.find_by_name(row[name_header])
+					if word.present?
+						word.update(definitions_attributes: [text: row[definition_header]])
+						log[:words_updated] += 1
+					else
+						word = Word.new(name: row[name_header], definitions_attributes: [text: row[definition_header]])
+						log[:words_created] += 1
+					end
+					word.set_unique_definitions
 					if word.save
 						log[:words_imported] += 1
 					else
@@ -53,17 +62,17 @@ class Word < ApplicationRecord
 		synonyms
 	end
 
-	def unique_definitions
+	def set_unique_definitions
 		unique_definitions = []
-    	definitions.each do |originial_definition|
-      		matching_definition = Definition.find_by_text(originial_definition.text)
+    	definitions.each do |original_definition|
+      		matching_definition = Definition.find_by_text(original_definition.text)
       		if matching_definition.present?
         		unique_definitions << matching_definition
       		else
-        		unique_definitions << originial_definition
+        		unique_definitions << original_definition
       		end
       	end
-      	unique_definitions
+      	self.definitions = unique_definitions.uniq
 	end
 
 	def self.search(term)

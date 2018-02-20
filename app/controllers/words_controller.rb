@@ -15,7 +15,7 @@ class WordsController < ApplicationController
 
   def import
     if params[:file].present?
-      notice = 'CSV data was successfully updated.'
+      notice = 'CSV data was successfully uploaded.'
       begin
         log = Word.import(params[:file], params[:name_header], params[:definition_header])
       rescue Exception => error
@@ -29,6 +29,8 @@ class WordsController < ApplicationController
         notice = ' Error processing file: ' + log[:file_error]
       end
       notice += "<br>" + log[:words_imported].to_s + " out of " + log[:word_total].to_s + " words imported" if log[:words_imported].present?
+      notice += "<br>" + log[:words_updated].to_s + " words updated" if log[:words_updated].present?
+      notice += "<br>" + log[:words_created].to_s + " words created" if log[:words_created].present?
       if log[:word_errors].present?
         notice += "<br> Word errors: <ul>" + log[:word_errors].keys.map{|name| '<li>' + name + ': ' + log[:word_errors][name].join + '</li>'}.join + '</ul>'
       end
@@ -60,8 +62,13 @@ class WordsController < ApplicationController
   # POST /words
   # POST /words.json
   def create
-    @word = Word.new(word_params)
-    @word.definitions = @word.unique_definitions
+    @word = Word.find_by_name(word_params[:name])
+    if @word.present?
+      @word.update(definitions_attributes: word_params[:definitions_attributes])
+    else
+      @word = Word.new(word_params)
+    end
+    @word.set_unique_definitions
 
     respond_to do |format|
       if @word.save
